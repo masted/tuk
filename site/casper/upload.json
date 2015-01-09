@@ -1,0 +1,12 @@
+[
+  ['~thenUrl', ''],
+  ['~fill', 'form#tukUpload', {
+    'images[]': [
+      '/home/user/ngn-env/ngn/more/lib/test/fixture/1.jpg'
+    ]
+  }],
+  ['~click', 'form#tukUpload .type_submit input'],
+  ['wait', 100],
+  ['~thenUrl', ''],
+  ['checkExistence', '#tukItemsAdd']
+]
