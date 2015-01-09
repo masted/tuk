@@ -1,6 +1,10 @@
 .idea
 site/config/constants/database.php
 site/data/*
-u/*
+site/logs
+site/temp
+/u/
 index.php
 cmd.php
+queue.php
+wss.php
