@@ -1,6 +1,6 @@
 <?php
 
-class CtrlId17Default extends CtrlThemeFour {
+class CtrlTukDefault extends CtrlThemeFour {
   use DdCrudParamFilterCtrl;
 
   protected function id() {
@@ -17,6 +17,10 @@ class CtrlId17Default extends CtrlThemeFour {
   }
 
   protected function init() {
+    Ngn::addEvent('auth', function($user) {
+      TukUserTemp::moveSessionToAuth($user['id']);
+    });
+    Auth::loginById(4);
     Sflm::frontend('js')->addPath('m/js/site.js');
     $this->d['layout'] = 'cols2';
     $this->d['menu'][] = [
@@ -44,28 +48,24 @@ class CtrlId17Default extends CtrlThemeFour {
       ]
     ], [
       'submitTitle' => 'Загрузить',
+      'id' => 'tukUpload',
       'dataParams'  => [
         'class' => 'TukUploadForm'
-      ],
-      'id' => 'tukUpload'
+      ]
     ]);
     UploadTemp::extendFormOptions($form, '/json_upload');
-    if ($form->isSubmittedAndValid()) {
-      if ($form->getData()) {
-        // {...}
-      }
-    }
-    $this->d['form'] = $form->html();
-    if (($loadedImages = UserTemp::get())) {
-      $this->d['imagesLoadedForm'] = $this->imagesLoadedForm($loadedImages);
+    if ($form->isSubmittedAndValid()) throw new Exception('non-ajax form request is not allowed');
+    $this->d['uploadForm'] = $form->html();
+    if (($loadedImages = TukUserTemp::get())) {
+      $this->d['itemsAddForm'] = $this->itemsAddForm($loadedImages);
     }
   }
 
   function action_json_upload() {
-    $this->imageLoadedAction(UserTemp::moveFromRequest($this->req));
+    $this->imageLoadedAction(TukUserTemp::moveFromRequest($this->req));
   }
 
-  protected function imagesLoadedForm(array $imageUrls) {
+  protected function itemsAddForm(array $imageUrls) {
     $protoFields = [
       ['type' => 'col'],
       [
@@ -113,26 +113,29 @@ class CtrlId17Default extends CtrlThemeFour {
     }
     $form = new DdForm($fields, 'items', [
       'submitTitle' => 'Добавить предметы',
-      'id' => 'tukItemsAdd'
+      'id' => 'tukItemsAdd',
+      'dataParams'  => [
+        'class' => 'TukItemsAddForm'
+      ],
     ]);
     $form->action = '/json_create';
     return $form->html();
   }
 
   protected function imageLoadedAction(array $imageUrls) {
-    $this->json['form'] = $this->imagesLoadedForm($imageUrls);
+    $this->json['form'] = $this->itemsAddForm($imageUrls);
   }
 
   function action_json_create() {
     $this->json['validated'] = 'ok';
     $im = DdCore::imDefault('items');
-    $images = UserTemp::get();
+    $images = Misc::checkEmpty(TukUserTemp::get(true));
     foreach ($this->req['descr'] as $n => $cat) {
       $im->create([
         'cat'   => $this->req['cat'][$n],
         'descr' => $this->req['descr'][$n],
         'image' => [
-          'tmp_name' => WEBROOT_PATH.$images[$n]
+          'tmp_name' => WEBROOT_PATH.'/'.$images[$n]
         ]
       ]);
     }
@@ -168,7 +171,7 @@ class CtrlId17Default extends CtrlThemeFour {
     $base = $mine ? '/list/mine' : '/list';
     $tags = DdTags::get('items', 'cat');
     $this->d['catTree'] = DdTagsHtml::treeUl( //
-      $tags->getData(), //
+      $tags->getData(),
       '`<a href="'.$base.'/t2.`.$groupName.`.`.$id.`"><i></i><span>`.$title.`<span>(`.$cnt.`)</span></a>`' //
     );
     $this->d['tpl'] = 'list';
