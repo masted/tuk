@@ -1,1 +1,1 @@
-* * * * * {cmd} "TukUserTemp::cleanup()"
+*/30 * * * * {cmd} "TukUserTemp::cleanup()"
