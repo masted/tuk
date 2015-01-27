@@ -5,6 +5,7 @@
   <div id="items"><?= $d['html'] ?></div>
 </div>
 
+<script src="/m/js/1.js"></script>
 <!--<script>
   $$('#items .item').each(function(eItem) {
     new Element('button', {

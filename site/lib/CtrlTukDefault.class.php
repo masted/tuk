@@ -11,21 +11,26 @@ class CtrlTukDefault extends CtrlThemeFour {
     return 'items';
   }
 
-  protected function processIm(DdItemsManager $im) {
+  protected function _getIm() {
+    $fields = new DdFields($this->getStrName());
+    $fields->fields['cat']['type'] = 'ddTagsTreeMultiselectDialogable';
+    $im = new DdItemsManager($this->items(), $this->objectProcess(new DdForm($fields, $this->getStrName()), 'form'));
     $im->imageSizes['smW'] = '120';
     $im->imageSizes['smH'] = '100';
+    return $im;
   }
 
   protected function init() {
-    Ngn::addEvent('auth', function($user) {
-      TukUserTemp::moveSessionToAuth($user['id']);
-    });
-    Auth::loginById(4);
-    Sflm::frontend('js')->addPath('m/js/site.js');
+    Sflm::frontend('js')->addClass('Ngn.Dialog.RequestForm');
+    Sflm::frontend('css')->addLib('icons');
     $this->d['layout'] = 'cols2';
     $this->d['menu'][] = [
       'title' => 'Товары',
       'link'  => '/list'
+    ];
+    $this->d['menu'][] = [
+      'title' => 'О сервисе',
+      'link'  => '/about',
     ];
   }
 
@@ -57,11 +62,13 @@ class CtrlTukDefault extends CtrlThemeFour {
     if ($form->isSubmittedAndValid()) throw new Exception('non-ajax form request is not allowed');
     $this->d['uploadForm'] = $form->html();
     if (($loadedImages = TukUserTemp::get())) {
+      die2($loadedImages);
       $this->d['itemsAddForm'] = $this->itemsAddForm($loadedImages);
     }
   }
 
   function action_json_upload() {
+    sleep(1);
     $this->imageLoadedAction(TukUserTemp::moveFromRequest($this->req));
   }
 
@@ -114,9 +121,6 @@ class CtrlTukDefault extends CtrlThemeFour {
     $form = new DdForm($fields, 'items', [
       'submitTitle' => 'Добавить предметы',
       'id' => 'tukItemsAdd',
-      'dataParams'  => [
-        'class' => 'TukItemsAddForm'
-      ],
     ]);
     $form->action = '/json_create';
     return $form->html();
@@ -129,7 +133,7 @@ class CtrlTukDefault extends CtrlThemeFour {
   function action_json_create() {
     $this->json['validated'] = 'ok';
     $im = DdCore::imDefault('items');
-    $images = Misc::checkEmpty(TukUserTemp::get(true));
+    $images = Misc::checkEmpty(TukUserTemp::get(true), 'no temp images by userId "'.Auth::get('id').'"');
     foreach ($this->req['descr'] as $n => $cat) {
       $im->create([
         'cat'   => $this->req['cat'][$n],
@@ -148,7 +152,7 @@ class CtrlTukDefault extends CtrlThemeFour {
         'title' => 'Общее',
         'link'  => '/list',
         'sel'   => !$this->curUser
-      ],
+      ]
     ];
     $mine = false;
     if (Auth::get('id')) {
@@ -166,20 +170,24 @@ class CtrlTukDefault extends CtrlThemeFour {
         'sel'   => true
       ];
     }
-    $this->d['blocksTpl'] = 'cat';
     $this->d['layout'] = 'cols2';
+    $this->d['blocksTpl'] = 'cat';
+    $this->d['tpl'] = 'list';
     $base = $mine ? '/list/mine' : '/list';
     $tags = DdTags::get('items', 'cat');
     $this->d['catTree'] = DdTagsHtml::treeUl( //
       $tags->getData(),
       '`<a href="'.$base.'/t2.`.$groupName.`.`.$id.`"><i></i><span>`.$title.`<span>(`.$cnt.`)</span></a>`' //
     );
-    $this->d['tpl'] = 'list';
     $this->d['html'] = (new Ddo('items', 'siteItems'))->setItems($items->getItems())->els();
   }
 
-  function action_ajax_deleteItem() {
-    DdCore::imDefault('items')->delete($this->req['id']);
+  function action_item() {
+    $this->d['layout'] = 'cols2';
+    $this->d['blocksTpl'] = 'user';
+    $this->d['tpl'] = 'item';
+    $this->d['item'] = $this->items()->getItem($this->req->param(1));
+    $this->d['user'] = DbModelCore::get('users', $this->d['item']['authorId']);
   }
 
 }

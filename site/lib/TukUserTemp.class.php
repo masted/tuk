@@ -35,6 +35,7 @@ class TukUserTemp {
     $id = session_id();
     $from = UPLOAD_PATH.'/temp/'.$id;
     $to = UPLOAD_PATH.'/temp/'.$userId;
+    LogWriter::str('user-temp', "start");
     if (!file_exists($from)) return;
     LogWriter::str('user-temp', "$from ---> $to");
     rename($from, $to);

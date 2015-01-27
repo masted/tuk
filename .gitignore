@@ -1,6 +1,5 @@
 .idea
 site/config/constants/database.php
-site/data/*
 site/logs
 site/temp
 /u/

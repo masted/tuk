@@ -1,25 +1,11 @@
 [
-  ['~thenUrl', ''],
-  ['~fill' , 'form#tukUpload', [
-    'images[]': [
-      '/home/user/ngn-env/ngn/more/lib/test/fixture/1.jpg'
+  ["~thenUrl", ""],
+  ["~fill" , "form#tukUpload", {
+    "images[]": [
+      "{ngnPath}/more/lib/test/fixture/1.jpg"
     ]
-  ]],
-  ['~click', 'form#tukUpload .type_submit input'],
-  ['wait', '100'],
-  ['~thenUrl, ''],
-  ['fill', 'form#tukItemsAdd', {
-
   }],
-  ['~click', 'form#tukItemsAdd .name_cat a.popupText'],
-  ['~click', '.treeMultiselectDialog .tagsTreeSelect input[type=checkbox]'],
-  ['~click', '.dialog-footer .btn'],
-  ['~click', 'form#tukItemsAdd .type_submit input'],
-  ['~click', '.tab-menu li:nth-child(2) a'],
-  ['~fill', 'form#formUserRegPhone', '[object Object]'],
-  ['~click', '#auth_ok'],
-  ['~fill', 'form#formUserReg', '[object Object]'],
-  ['~click', '#auth_ok']
-  ['~wait', 2000]
+  ["~submit", "form#tukUpload"],
+  ["~thenUrl", ""],
 ]
 

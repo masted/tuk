@@ -1,1 +1,1 @@
-casperjs C:/www/refactor/ngn-env/ngn/more/casper/test.js --projectDir=C:/www/refactor/tuk-tuk --disableAfterCaptureCmd=1 --stepsFile=C:/www/refactor/tuk-tuk/site/casper/upload.json --rumaxFolder=C:/1/captures
+php C:/www/refactor/ngn-env/projects/tuk/cmd.php preTestUpload; casperjs C:/www/refactor/ngn-env/ngn/more/casper/test.js --projectDir=C:/www/refactor/ngn-env/projects/tuk --disableAfterCaptureCmd=1 --stepsFile=upload --rumaxFolder=C:/1/captures --ngnPath=C:/www/refactor/ngn-env/ngn
