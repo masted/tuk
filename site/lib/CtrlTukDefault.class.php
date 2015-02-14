@@ -42,100 +42,30 @@ class CtrlTukDefault extends CtrlThemeFour {
     $this->d['topTpl'] = 'shortHomeText';
     $this->d['blocksTpl'] = 'upload';
     $this->d['tpl'] = 'default';
+    Sflm::frontend('js')->addClass('Ngn.TukUploadForm');
     Sflm::frontend('js')->addPath('i/js/ngn/form/init.js');
-    $form = new Form([
-      [
-        'title'        => 'Фотографии ваших вещей',
-        'name'         => 'images',
-        'type'         => 'file',
-        'multiple'     => true,
-        'allowedMimes' => ['image/gif', 'image/jpeg', 'image/png', 'image/bmp']
-      ]
-    ], [
-      'submitTitle' => 'Загрузить',
-      'id' => 'tukUpload',
-      'dataParams'  => [
-        'class' => 'TukUploadForm'
-      ]
-    ]);
-    UploadTemp::extendFormOptions($form, '/json_upload');
+    $form = new TukUploadForm;
     if ($form->isSubmittedAndValid()) throw new Exception('non-ajax form request is not allowed');
     $this->d['uploadForm'] = $form->html();
     if (($loadedImages = TukUserTemp::get())) {
-      die2($loadedImages);
-      $this->d['itemsAddForm'] = $this->itemsAddForm($loadedImages);
+      Sflm::frontend('js')->addClass('Ngn.TukItemsAddForm');
+      $this->d['itemsAddForm'] = (new TukItemsAddForm($loadedImages))->html();
     }
   }
 
   function action_json_upload() {
-    sleep(1);
-    $this->imageLoadedAction(TukUserTemp::moveFromRequest($this->req));
-  }
-
-  protected function itemsAddForm(array $imageUrls) {
-    $protoFields = [
-      ['type' => 'col'],
-      [
-        'type'     => 'staticText',
-        'rowClass' => 'image',
-        'text'     => '<a href="{url}" class="lightbox"><img src="{smUrl}"></a>'
-      ],
-      [
-        'title'     => 'Описание',
-        'type'      => 'textarea',
-        'useTypeJs' => false,
-        'name'      => 'descr'
-      ],
-      [
-        'title'    => 'Категория',
-        'type'     => 'ddTagsTreeMultiselectDialogable',
-        'required' => true,
-        'name'     => 'cat'
-      ],
-    ];
-    $fields = [];
-    $fields[] = [
-      'type' => 'staticText',
-      'text' => '<h2>Вы загрузили эти вещи, но ещё не добавили</h2>'
-    ];
-    foreach ($imageUrls as $n => $url) {
-      $colFields = $protoFields;
-      $colFields[1]['text'] = St::tttt($colFields[1]['text'], [
-        'url'   => $url,
-        'smUrl' => Misc::getFilePrefexedPath($url, 'sm_'),
-      ]);
-      $colFields[2]['name'] = $colFields[2]['name']."[$n]";
-      $colFields[3]['name'] = $colFields[3]['name']."[$n]";
-      foreach ($colFields as $f) $fields[] = $f;
-    }
-    if (Auth::get('id')) {
-      $fields[] = [
-        'type' => 'col',
-        'name' => 'userInfo'
-      ];
-      $fields[] = [
-        'type' => 'staticText',
-        'text' => 'Вы добавляете это сообщения как '.Auth::get('login')
-      ];
-    }
-    $form = new DdForm($fields, 'items', [
-      'submitTitle' => 'Добавить предметы',
-      'id' => 'tukItemsAdd',
-    ]);
-    $form->action = '/json_create';
-    return $form->html();
+    $this->imageLoadedAction(array_merge(TukUserTemp::get(), TukUserTemp::moveFromRequest($this->req)));
   }
 
   protected function imageLoadedAction(array $imageUrls) {
-    $this->json['form'] = $this->itemsAddForm($imageUrls);
+    $this->json['itemsAddForm'] = '<div class="apeform">'.(new TukItemsAddForm($imageUrls))->html().'</div>';
   }
 
   function action_json_create() {
     $this->json['validated'] = 'ok';
-    $im = DdCore::imDefault('items');
     $images = Misc::checkEmpty(TukUserTemp::get(true), 'no temp images by userId "'.Auth::get('id').'"');
     foreach ($this->req['descr'] as $n => $cat) {
-      $im->create([
+      $this->getIm()->create([
         'cat'   => $this->req['cat'][$n],
         'descr' => $this->req['descr'][$n],
         'image' => [
@@ -177,7 +107,7 @@ class CtrlTukDefault extends CtrlThemeFour {
     $tags = DdTags::get('items', 'cat');
     $this->d['catTree'] = DdTagsHtml::treeUl( //
       $tags->getData(),
-      '`<a href="'.$base.'/t2.`.$groupName.`.`.$id.`"><i></i><span>`.$title.`<span>(`.$cnt.`)</span></a>`' //
+      '`<a href="'.$base.'/t2.`.$groupName.`.`.$id.`"><i></i><span><span class="tit">`.$title.`</span><span class="cnt">`.$cnt.`</span></a>`' //
     );
     $this->d['html'] = (new Ddo('items', 'siteItems'))->setItems($items->getItems())->els();
   }
@@ -188,6 +118,19 @@ class CtrlTukDefault extends CtrlThemeFour {
     $this->d['tpl'] = 'item';
     $this->d['item'] = $this->items()->getItem($this->req->param(1));
     $this->d['user'] = DbModelCore::get('users', $this->d['item']['authorId']);
+    $this->setPageTitle($this->d['item']['title']);
+  }
+
+  function action_json_sendMsg() {
+    return $this->jsonFormAction(new Form([
+      [
+        'name' => 'text',
+        'type' => 'textarea'
+      ]
+    ], [
+      'title' => 'Отправка SMS на ' . DbModelCore::get('users', $this->req->param(1))['phone'],
+      'submitTitle' => 'Отправить'
+    ]));
   }
 
 }

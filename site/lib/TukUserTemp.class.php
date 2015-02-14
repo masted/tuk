@@ -24,6 +24,7 @@ class TukUserTemp {
     else {
       $id = Auth::get('id') ?: session_id();
     }
+    if ($id === null) return [];
     return array_map(function ($v) {
       return str_replace(UPLOAD_PATH, UPLOAD_DIR, $v);
     }, array_filter(glob(UPLOAD_PATH.'/temp/'.$id.'/*'), function ($v) {
@@ -35,9 +36,8 @@ class TukUserTemp {
     $id = session_id();
     $from = UPLOAD_PATH.'/temp/'.$id;
     $to = UPLOAD_PATH.'/temp/'.$userId;
-    LogWriter::str('user-temp', "start");
     if (!file_exists($from)) return;
-    LogWriter::str('user-temp', "$from ---> $to");
+    Dir::remove($to);
     rename($from, $to);
   }
 

@@ -18,20 +18,8 @@ Ngn.TukUploadForm = new Class({
   Extends: Ngn.Form,
 
   submitedAndUploaded: function(r) {
-    c('1111111111111');
     if (!r.result || !r.result.form) throw new Error('no form in result');
-    c('2222222222222');
     Ngn.Form.factory(Elements.from(r.result.form)[0].inject('itemsAdd'));
   }
 
-});
-
-document.addEvent('domready', function() {
-  new Ngn.Request({
-    url: '/ajax_slow',
-    onComplete: function() {
-      c(Ngn.Request.inProgress);
-    }
-  }).send();
-  c(Ngn.Request.inProgress);
 });

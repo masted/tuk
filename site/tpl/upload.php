@@ -1,5 +1,5 @@
 <div class="bColBody blockMenu blockUpload">
-  <h1>Загрузите вещи</h1>
+  <h2>Загрузите вещи</h2>
   <div class="apeform">
     <?= $d['uploadForm'] ?>
   </div>
