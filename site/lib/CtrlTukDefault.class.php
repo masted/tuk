@@ -25,7 +25,7 @@ class CtrlTukDefault extends CtrlThemeFour {
     Sflm::frontend('css')->addLib('icons');
     $this->d['layout'] = 'cols2';
     $this->d['menu'][] = [
-      'title' => 'Товары',
+      'title' => 'Вещи',
       'link'  => '/list'
     ];
     $this->d['menu'][] = [
@@ -42,13 +42,11 @@ class CtrlTukDefault extends CtrlThemeFour {
     $this->d['topTpl'] = 'shortHomeText';
     $this->d['blocksTpl'] = 'upload';
     $this->d['tpl'] = 'default';
-    Sflm::frontend('js')->addClass('Ngn.TukUploadForm');
-    Sflm::frontend('js')->addPath('i/js/ngn/form/init.js');
+    Sflm::frontend('js')->addPath('i/js/ngn/form/domreadyInit.js');
     $form = new TukUploadForm;
     if ($form->isSubmittedAndValid()) throw new Exception('non-ajax form request is not allowed');
     $this->d['uploadForm'] = $form->html();
     if (($loadedImages = TukUserTemp::get())) {
-      Sflm::frontend('js')->addClass('Ngn.TukItemsAddForm');
       $this->d['itemsAddForm'] = (new TukItemsAddForm($loadedImages))->html();
     }
   }
@@ -64,10 +62,10 @@ class CtrlTukDefault extends CtrlThemeFour {
   function action_json_create() {
     $this->json['validated'] = 'ok';
     $images = Misc::checkEmpty(TukUserTemp::get(true), 'no temp images by userId "'.Auth::get('id').'"');
-    foreach ($this->req['descr'] as $n => $cat) {
+    foreach ($this->req['title'] as $n => $cat) {
       $this->getIm()->create([
         'cat'   => $this->req['cat'][$n],
-        'descr' => $this->req['descr'][$n],
+        'title' => $this->req['title'][$n],
         'image' => [
           'tmp_name' => WEBROOT_PATH.'/'.$images[$n]
         ]
