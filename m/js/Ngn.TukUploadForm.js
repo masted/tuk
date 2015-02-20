@@ -1,4 +1,4 @@
-Ngn.TukUploadForm = new Class({
+Ngn.MultiPhotoUploadForm = new Class({
   Extends: Ngn.Form,
 
   submitedAndUploaded: function(r) {
