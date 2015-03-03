@@ -1,6 +1,6 @@
 <?php
 
-if (!defined('SITE_DOMAIN')) define('SITE_DOMAIN', 'localhost:888');
+if (!defined('SITE_DOMAIN')) define('SITE_DOMAIN', 'local.tuk');
 
 if (!defined('TEMPLATE_DEBUG')) define('TEMPLATE_DEBUG', true);
 
