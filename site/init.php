@@ -1,3 +1,5 @@
 <?php
 
-require NGN_ENV_PATH.'/thm-modules/fleaMarket/init.php';
+require_once NGN_ENV_PATH.'/thm/four/init.php';
+
+ThmFourModule::init('fleaMarket');
